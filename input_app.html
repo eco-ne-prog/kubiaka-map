@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>クビアカツヤカミキリ 捕獲記録</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #e05c2a;
+    --accent2: #f0a04b;
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --success: #3fb950;
+    --error: #f85149;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 40px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1a0a00 0%, #2d1200 50%, #1a0a00 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .beetle-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 0 8px var(--accent));
+  }
+
+  .header-text h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent2);
+    line-height: 1.2;
+  }
+
+  .header-text p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  label .required {
+    color: var(--error);
+    margin-left: 3px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    padding: 10px 12px;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(224,92,42,0.15);
+  }
+
+  input[type="number"] {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237d8590' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  .count-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .count-btn {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .count-btn:active { background: var(--border); }
+  .count-btn.plus { border-color: var(--accent); color: var(--accent); }
+
+  .count-row input { flex: 1; }
+
+  .sex-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .sex-input-wrap { position: relative; }
+  .sex-input-wrap label {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    font-size: 11px;
+    margin: 0;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  .sex-input-wrap input {
+    padding-top: 22px;
+    padding-bottom: 6px;
+    font-size: 20px;
+  }
+
+  .location-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 9px 4px;
+    background: var(--surface2);
+    border: none;
+    color: var(--text-muted);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .coord-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .gps-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--surface2);
+    border: 1px dashed var(--accent2);
+    border-radius: 6px;
+    color: var(--accent2);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .gps-btn:active { background: var(--border); }
+
+  .geocode-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s, border-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .geocode-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .location-status {
+    font-size: 12px;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    display: none;
+  }
+
+  .location-status.ok {
+    display: block;
+    background: rgba(63,185,80,0.1);
+    border: 1px solid rgba(63,185,80,0.3);
+    color: var(--success);
+  }
+
+  .location-status.err {
+    display: block;
+    background: rgba(248,81,73,0.1);
+    border: 1px solid rgba(248,81,73,0.3);
+    color: var(--error);
+  }
+
+  .tree-species-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .tree-chip {
+    padding: 8px 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tree-chip.selected {
+    background: rgba(224,92,42,0.15);
+    border-color: var(--accent);
+    color: var(--accent2);
+    font-weight: 700;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent), #c04820);
+    border: none;
+    border-radius: var(--radius);
+    color: #fff;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+    transition: opacity 0.2s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 12px 20px;
+    font-size: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    z-index: 1000;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--success); color: var(--success); }
+  .toast.error { border-color: var(--error); color: var(--error); }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .memo-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  /* date quick select */
+  .date-row { display: flex; gap: 8px; align-items: center; }
+  .date-today-btn {
+    flex-shrink: 0;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--accent2);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="beetle-icon">🪲</div>
+    <div class="header-text">
+      <h1>クビアカツヤカミキリ 捕獲記録</h1>
+      <p>群馬県環境アドバイザー 自然環境部会</p>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- 基本情報 -->
+  <div class="card">
+    <div class="card-title">基本情報</div>
+
+    <div class="form-group">
+      <label>記録日 <span class="required">*</span></label>
+      <div class="date-row">
+        <input type="date" id="recordDate" required>
+        <button class="date-today-btn" onclick="setToday()">今日</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>記録者名 <span class="required">*</span></label>
+      <input type="text" id="observer" placeholder="氏名を入力" autocomplete="name">
+    </div>
+
+    <div class="form-group">
+      <label>捕獲器ID / 設置地点名</label>
+      <input type="text" id="trapId" placeholder="例: G-001, 前橋公園北口">
+    </div>
+  </div>
+
+  <!-- 捕獲数 -->
+  <div class="card">
+    <div class="card-title">捕獲頭数</div>
+
+    <div class="form-group">
+      <label>合計捕獲数 <span class="required">*</span></label>
+      <div class="count-row">
+        <button class="count-btn" onclick="changeCount('total',-1)">−</button>
+        <input type="number" id="countTotal" value="0" min="0" inputmode="numeric">
+        <button class="count-btn plus" onclick="changeCount('total',1)">＋</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>雌雄別（任意）</label>
+      <div class="sex-row">
+        <div class="sex-input-wrap">
+          <label>♂ オス</label>
+          <input type="number" id="countMale" value="" min="0" inputmode="numeric" placeholder="-">
+        </div>
+        <div class="sex-input-wrap">
+          <label>♀ メス</label>
+          <input type="number" id="countFemale" value="" min="0" inputmode="numeric" placeholder="-">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 位置情報 -->
+  <div class="card">
+    <div class="card-title">位置情報</div>
+
+    <div class="location-tabs">
+      <button class="tab-btn active" onclick="switchTab('gps')">📍 GPS取得</button>
+      <button class="tab-btn" onclick="switchTab('coord')">🔢 緯度経度入力</button>
+      <button class="tab-btn" onclick="switchTab('address')">🏠 住所入力</button>
+    </div>
+
+    <!-- GPS -->
+    <div class="tab-content active" id="tab-gps">
+      <button class="gps-btn" onclick="getCurrentLocation()">
+        <span>📡</span> 現在地を取得する
+      </button>
+      <div class="coord-row">
+        <div class="form-group" style="margin:0">
+          <label>緯度</label>
+          <input type="text" id="lat" readonly placeholder="取得待ち..." style="font-size:14px">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>経度</label>
+          <input type="text" id="lng" readonly placeholder="取得待ち..." style="font-size:14px">
+        </div>
+      </div>
+    </div>
+
+    <!-- 手入力 -->
+    <div class="tab-content" id="tab-coord">
+      <div class="coord-row">
+        <div class="form-group" style="margin:0">
+          <label>緯度 <span class="required">*</span></label>
+          <input type="text" id="latManual" placeholder="36.3894" inputmode="decimal">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>経度 <span class="required">*</span></label>
+          <input type="text" id="lngManual" placeholder="139.0601" inputmode="decimal">
+        </div>
+      </div>
+    </div>
+
+    <!-- 住所 -->
+    <div class="tab-content" id="tab-address">
+      <div class="form-group" style="margin-bottom:0">
+        <label>住所</label>
+        <input type="text" id="addressInput" placeholder="例: 群馬県前橋市大手町1-1-1" autocomplete="street-address">
+        <button class="geocode-btn" onclick="geocodeAddress()">🔍 住所から座標を取得</button>
+      </div>
+    </div>
+
+    <div class="location-status" id="locationStatus"></div>
+  </div>
+
+  <!-- 樹木情報 -->
+  <div class="card">
+    <div class="card-title">樹木情報</div>
+
+    <div class="form-group">
+      <label>樹種（複数選択可）</label>
+      <div class="tree-species-grid" id="treeGrid">
+        <!-- JS で生成 -->
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>その他の樹種</label>
+      <input type="text" id="treeOther" placeholder="樹種名を入力">
+    </div>
+  </div>
+
+  <!-- メモ -->
+  <div class="card">
+    <div class="card-title">メモ・備考</div>
+    <div class="form-group" style="margin-bottom:4px">
+      <textarea id="memo" rows="3" placeholder="気になった点、環境の状況など" maxlength="200" style="resize:none"></textarea>
+    </div>
+    <div class="memo-count"><span id="memoCount">0</span> / 200</div>
+  </div>
+
+  <!-- 送信 -->
+  <button class="submit-btn" id="submitBtn" onclick="submitData()">
+    📤 記録を送信する
+  </button>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ======================================================
+// 設定
+// ======================================================
+// ★ Google Apps Script の Web App URL をここに入力
+const GAS_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exechttps://script.google.com/macros/s/AKfycby-dNQW38NdZNuq3dLnazLDpvPVEwxcZf0LaE2a1Rs1NN44zi5-mH9NxnFyHVNCa_wq/exec';
+
+// 樹種リスト
+const TREE_SPECIES = ['サクラ','モモ','スモモ','ウメ','アンズ','ネクタリン','ナシ','リンゴ','カリン'];
+
+// ======================================================
+// 初期化
+// ======================================================
+window.addEventListener('DOMContentLoaded', () => {
+  setToday();
+  loadSavedObserver();
+  buildTreeGrid();
+  document.getElementById('memo').addEventListener('input', updateMemoCount);
+  document.getElementById('countMale').addEventListener('input', syncTotalFromSex);
+  document.getElementById('countFemale').addEventListener('input', syncTotalFromSex);
+});
+
+function setToday() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  document.getElementById('recordDate').value = `${y}-${m}-${day}`;
+}
+
+function loadSavedObserver() {
+  const saved = localStorage.getItem('observer_name');
+  if (saved) document.getElementById('observer').value = saved;
+}
+
+function buildTreeGrid() {
+  const grid = document.getElementById('treeGrid');
+  TREE_SPECIES.forEach(sp => {
+    const div = document.createElement('div');
+    div.className = 'tree-chip';
+    div.textContent = sp;
+    div.onclick = () => div.classList.toggle('selected');
+    grid.appendChild(div);
+  });
+}
+
+function updateMemoCount() {
+  document.getElementById('memoCount').textContent = this.value.length;
+}
+
+// ======================================================
+// カウンター
+// ======================================================
+function changeCount(field, delta) {
+  const el = document.getElementById('countTotal');
+  const val = Math.max(0, (parseInt(el.value)||0) + delta);
+  el.value = val;
+}
+
+function syncTotalFromSex() {
+  const m = parseInt(document.getElementById('countMale').value)||0;
+  const f = parseInt(document.getElementById('countFemale').value)||0;
+  if (m || f) document.getElementById('countTotal').value = m + f;
+}
+
+// ======================================================
+// タブ切替
+// ======================================================
+let activeTab = 'gps';
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['gps','coord','address'][i] === tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  clearLocationStatus();
+}
+
+// ======================================================
+// 位置情報
+// ======================================================
+function getCurrentLocation() {
+  setLocationStatus('📡 位置情報を取得中...', '');
+  if (!navigator.geolocation) {
+    setLocationStatus('このブラウザは位置情報に対応していません', 'err'); return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+      document.getElementById('lat').value = lat;
+      document.getElementById('lng').value = lng;
+      setLocationStatus(`✅ 取得完了  精度: ±${Math.round(pos.coords.accuracy)}m`, 'ok');
+    },
+    err => setLocationStatus(`❌ エラー: ${err.message}`, 'err'),
+    { enableHighAccuracy: true, timeout: 15000 }
+  );
+}
+
+async function geocodeAddress() {
+  const addr = document.getElementById('addressInput').value.trim();
+  if (!addr) { setLocationStatus('住所を入力してください', 'err'); return; }
+  setLocationStatus('🔍 ジオコーディング中...', '');
+  try {
+    // 東京大学 CSI ジオコーダー API
+    const url = `https://geocoder.csis.u-tokyo.ac.jp/geocode/?q=${encodeURIComponent(addr)}&abr=true&geotype=json`;
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json?.candidate?.length > 0) {
+      const c = json.candidate[0];
+      document.getElementById('latManual').value = parseFloat(c.lat).toFixed(6);
+      document.getElementById('lngManual').value = parseFloat(c.lng).toFixed(6);
+      switchTab('coord');
+      setLocationStatus(`✅ 変換完了: ${c.address || addr}`, 'ok');
+    } else {
+      setLocationStatus('❌ 住所が見つかりませんでした', 'err');
+    }
+  } catch(e) {
+    setLocationStatus(`❌ 通信エラー: ${e.message}`, 'err');
+  }
+}
+
+function setLocationStatus(msg, type) {
+  const el = document.getElementById('locationStatus');
+  el.textContent = msg;
+  el.className = 'location-status ' + (type || '');
+  if (!type) el.style.display = 'block';
+}
+
+function clearLocationStatus() {
+  const el = document.getElementById('locationStatus');
+  el.className = 'location-status';
+}
+
+function getCoords() {
+  if (activeTab === 'gps') {
+    return { lat: document.getElementById('lat').value, lng: document.getElementById('lng').value };
+  } else {
+    return { lat: document.getElementById('latManual').value, lng: document.getElementById('lngManual').value };
+  }
+}
+
+// ======================================================
+// 送信
+// ======================================================
+async function submitData() {
+  const btn = document.getElementById('submitBtn');
+
+  // バリデーション
+  const date = document.getElementById('recordDate').value;
+  const observer = document.getElementById('observer').value.trim();
+  const total = parseInt(document.getElementById('countTotal').value)||0;
+  const { lat, lng } = getCoords();
+
+  if (!date) { showToast('記録日を入力してください', 'error'); return; }
+  if (!observer) { showToast('記録者名を入力してください', 'error'); return; }
+  if (!lat || !lng) { showToast('位置情報を設定してください', 'error'); return; }
+
+  // 樹種
+  const selected = [...document.querySelectorAll('.tree-chip.selected')].map(c=>c.textContent);
+  const other = document.getElementById('treeOther').value.trim();
+  if (other) selected.push(other);
+
+  const payload = {
+    date,
+    observer,
+    trapId:   document.getElementById('trapId').value.trim(),
+    total,
+    male:     document.getElementById('countMale').value || '',
+    female:   document.getElementById('countFemale').value || '',
+    lat:      parseFloat(lat),
+    lng:      parseFloat(lng),
+    address:  activeTab === 'address' ? document.getElementById('addressInput').value.trim() : '',
+    treeSpecies: selected.join('・'),
+    memo:     document.getElementById('memo').value.trim(),
+    timestamp: new Date().toISOString()
+  };
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>送信中...';
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    // no-cors では response body は読めないが送信成功として扱う
+    localStorage.setItem('observer_name', observer);
+    showToast('✅ 記録を送信しました', 'success');
+    resetForm();
+  } catch(e) {
+    showToast('❌ 送信エラー: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📤 記録を送信する';
+  }
+}
+
+function resetForm() {
+  document.getElementById('trapId').value = '';
+  document.getElementById('countTotal').value = 0;
+  document.getElementById('countMale').value = '';
+  document.getElementById('countFemale').value = '';
+  document.getElementById('lat').value = '';
+  document.getElementById('lng').value = '';
+  document.getElementById('latManual').value = '';
+  document.getElementById('lngManual').value = '';
+  document.getElementById('addressInput').value = '';
+  document.getElementById('treeOther').value = '';
+  document.getElementById('memo').value = '';
+  document.getElementById('memoCount').textContent = '0';
+  document.querySelectorAll('.tree-chip.selected').forEach(c=>c.classList.remove('selected'));
+  clearLocationStatus();
+  setToday();
+}
+
+// ======================================================
+// Toast
+// ======================================================
+let toastTimer = null;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
