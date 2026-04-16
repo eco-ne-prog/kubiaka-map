@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クビアカツヤカミキリ 分布マップ | 群馬県</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --bg: #0f1318;
+    --surface: #161c25;
+    --surface2: #1e2533;
+    --border: #2a3344;
+    --accent: #e05c2a;
+    --accent2: #f0a04b;
+    --text: #d8e4f0;
+    --text-muted: #6b7f99;
+    --success: #3fb950;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── ヘッダー ── */
+  #header {
+    background: linear-gradient(90deg, #150800 0%, #1a1000 50%, #150800 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 1000;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .beetle { font-size: 28px; filter: drop-shadow(0 0 6px var(--accent)); }
+
+  .title-block h1 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent2);
+    line-height: 1.2;
+  }
+
+  .title-block p { font-size: 11px; color: var(--text-muted); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #lastUpdate {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .refresh-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  .refresh-btn:hover { border-color: var(--accent); }
+
+  /* ── メインレイアウト ── */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── サイドパネル ── */
+  #sidebar {
+    width: 300px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .panel-section {
+    border-bottom: 1px solid var(--border);
+    padding: 14px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  /* 統計カード */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 26px;
+    color: var(--accent2);
+    line-height: 1;
+  }
+
+  .stat-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+  /* フィルター */
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  select, input[type="date"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    padding: 6px 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  select:focus, input:focus { outline: none; border-color: var(--accent); }
+
+  .filter-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+  }
+
+  .filter-group { flex: 1; min-width: 0; }
+
+  /* チャート */
+  .chart-wrap {
+    padding: 14px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 160px;
+    margin-bottom: 16px;
+  }
+
+  /* マップ */
+  #map {
+    flex: 1;
+    position: relative;
+  }
+
+  /* カスタムポップアップ */
+  .leaflet-popup-content-wrapper {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    color: var(--text) !important;
+  }
+
+  .leaflet-popup-tip { background: var(--surface) !important; }
+
+  .popup-header {
+    font-weight: 700;
+    color: var(--accent2);
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .popup-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 28px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .popup-count-label { font-size: 11px; color: var(--text-muted); }
+
+  .popup-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .popup-row span:last-child { color: var(--text); }
+
+  /* ローディング */
+  #loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(15,19,24,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    gap: 12px;
+  }
+
+  .loader-ring {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading p { color: var(--text-muted); font-size: 13px; }
+
+  /* 凡例 */
+  .legend {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 5px;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* スマホ対応 */
+  @media (max-width: 640px) {
+    #sidebar { display: none; }
+    #sidebar.show {
+      display: flex;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 800;
+    }
+    .menu-btn {
+      display: flex !important;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+  }
+
+  .menu-btn { display: none; }
+
+  .heatmap-toggle {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .heatmap-toggle.on { border-color: var(--accent2); color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<!-- ヘッダーセクション：タイトルと操作ボタンを表示 -->
+<div id="header">
+  <div class="header-left">
+    <div class="beetle">🪲</div>
+    <div class="title-block">
+      <h1>クビアカツヤカミキリ 捕獲分布マップ</h1>
+      <p>群馬県環境アドバイザー 自然環境部会</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span id="lastUpdate">--</span>
+    <button class="menu-btn" onclick="toggleSidebar()">☰ データ</button>
+    <button class="refresh-btn" onclick="loadData()">🔄 更新</button>
+  </div>
+</div>
+
+<!-- メインコンテンツ：サイドパネルとマップを表示 -->
+<div id="main">
+  <!-- サイドパネル：統計、フィルター、チャートを表示 -->
+  <div id="sidebar">
+
+    <!-- 統計サマリーセクション：総捕獲数などの集計を表示 -->
+    <div class="panel-section">
+      <div class="section-title">集計サマリー</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">-</div>
+          <div class="stat-label">総捕獲数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statDays">-</div>
+          <div class="stat-label">記録日数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statTraps">-</div>
+          <div class="stat-label">捕獲器数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statMax">-</div>
+          <div class="stat-label">最大/日</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- フィルターセクション：日付、捕獲器、樹種でデータを絞り込み -->
+    <div class="panel-section">
+      <div class="section-title">フィルター</div>
+      <div class="filter-row">
+        <div class="filter-group">
+          <div class="filter-label">開始日</div>
+          <input type="date" id="filterStart">
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">終了日</div>
+          <input type="date" id="filterEnd">
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-group">
+          <div class="filter-label">捕獲器</div>
+          <select id="filterTrap">
+            <option value="">すべて</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">樹種</div>
+          <select id="filterTree">
+            <option value="">すべて</option>
+          </select>
+        </div>
+      </div>
+      <button class="refresh-btn" style="width:100%;margin-top:4px" onclick="applyFilter()">
+        🔍 フィルター適用
+      </button>
+    </div>
+
+    <!-- チャートセクション：日別捕獲数と捕獲器別のグラフを表示 -->
+    <div class="chart-wrap">
+      <div class="section-title" style="margin-bottom:10px">日別捕獲数推移</div>
+      <div class="chart-container">
+        <canvas id="chartDaily"></canvas>
+      </div>
+
+      <div class="section-title" style="margin-bottom:10px">捕獲器別合計</div>
+      <div class="chart-container">
+        <canvas id="chartTrap"></canvas>
+      </div>
+
+      <div class="section-title" style="margin-bottom:10px">凡例（捕獲数）</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>1〜4頭</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div><span>5〜19頭</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span>20〜49頭</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div><span>50頭以上</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- マップセクション：Leafletマップを表示 -->
+  <div id="map">
+    <!-- ローディング表示：データ読み込み中のスピナー -->
+    <div id="loading">
+      <div class="loader-ring"></div>
+      <p>データを読み込んでいます...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================================================
+// 設定  ★ ここを編集 ★
+// ======================================================
+// Google スプレッドシートの「ウェブに公開」で発行されたCSV URL
+// （スプレッドシート → ファイル → 共有 → ウェブに公開 → CSV のリンク）
+// ※ /export?format=csv のURLではなく、/pub?...output=csv のURLを使うこと
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFuC9wE6drjOccMi4ntOCLZjFas24odjVCO_nrTbcBiIeNwU3GYPzFmm6Z6NoiRIKDnZTLMKG2MPEp/pub?gid=0&single=true&output=csv';
+
+// ======================================================
+// マップ初期化
+// ======================================================
+// Leafletマップの初期設定：中心座標、ズームレベル、コントロール
+const map = L.map('map', {
+  center: [36.4, 139.06],
+  zoom: 10,
+  zoomControl: true
+});
+
+// ダークテーマのタイルレイヤーを追加
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap, © CARTO',
+  maxZoom: 19
+}).addTo(map);
+
+// マーカークラスタリンググループを作成（近接マーカーをまとめる）
+const markerCluster = L.markerClusterGroup({ maxClusterRadius: 50 });
+map.addLayer(markerCluster);
+
+// ======================================================
+// データ管理
+// ======================================================
+// 生データ（全データ）、フィルター済みデータ、チャートインスタンスを保持
+let rawData = [];
+let filteredData = [];
+let charts = {};
+
+// GoogleスプレッドシートからCSVデータを非同期で読み込み
+async function loadData() {
+  // ローディング表示を開始
+  document.getElementById('loading').style.display = 'flex';
+  try {
+    // キャッシュを回避するためにタイムスタンプを付与
+    // mode:'cors' を明示し、Googleの公開CSVエンドポイント(/pub?...output=csv)を使用すること
+    const url = SHEET_CSV_URL + (SHEET_CSV_URL.includes('?') ? '&' : '?') + '_t=' + Date.now();
+    const res = await fetch(url, { mode: 'cors', cache: 'no-store' });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}。スプレッドシートが「ウェブに公開」されているか確認してください。`);
+    }
+
+    const text = await res.text();
+
+    // 取得内容がHTMLの場合はURL誤りまたは未公開
+    if (text.trim().startsWith('<')) {
+      throw new Error('CSVではなくHTMLが返されました。SHEET_CSV_URLに「ウェブに公開」のCSV URLが設定されているか確認してください。(/pub?...output=csv の形式)');
+    }
+
+    // デバッグ: 取得したCSVの先頭2行をコンソールに出力
+    const csvPreview = text.trim().split('\n').slice(0,3).join('\n');
+    console.log('[CSV先頭3行]', csvPreview);
+
+    // CSVテキストをオブジェクト配列にパース
+    rawData = parseCSV(text);
+    console.log('[parseCSV結果] ' + rawData.length + '件', rawData.length > 0 ? rawData[0] : '');
+
+    if (rawData.length === 0) {
+      // CSVの行数を確認してより詳しいメッセージを表示
+      const totalLines = text.trim().split('\n').filter(l=>l.trim()).length;
+      showStatus(
+        `⚠️ データが0件です（CSV取得行数: ${totalLines}行）。` +
+        'ブラウザの開発者ツール(F12)→コンソールでCSV内容を確認してください。', 'warn');
+    }
+
+    // フィルター済みデータを初期化し、フィルターオプションを更新
+    filteredData = [...rawData];
+    updateFilterOptions();
+    applyFilter();
+    // 最終更新時刻を表示
+    document.getElementById('lastUpdate').textContent =
+      '更新: ' + new Date().toLocaleTimeString('ja-JP') + '（' + rawData.length + '件）';
+
+  } catch(e) {
+    console.error('loadData error:', e);
+    showStatus('❌ データ読み込みエラー: ' + e.message, 'error');
+  } finally {
+    // ローディング表示を終了
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+function showStatus(msg, type) {
+  // マップ上にステータスメッセージを表示
+  let el = document.getElementById('mapStatus');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'mapStatus';
+    el.style.cssText = `
+      position:absolute; top:60px; left:50%; transform:translateX(-50%);
+      z-index:1000; padding:10px 18px; border-radius:8px; font-size:13px;
+      max-width:90%; text-align:center; pointer-events:none;
+      font-family:'Noto Sans JP',sans-serif;
+    `;
+    document.getElementById('map').appendChild(el);
+  }
+  if (type === 'error') {
+    el.style.background = 'rgba(248,81,73,0.15)';
+    el.style.border = '1px solid #f85149';
+    el.style.color = '#f85149';
+  } else {
+    el.style.background = 'rgba(240,160,75,0.15)';
+    el.style.border = '1px solid #f0a04b';
+    el.style.color = '#f0a04b';
+  }
+  el.textContent = msg;
+  el.style.display = 'block';
+  // 10秒後に自動消去（warningのみ）
+  if (type === 'warn') setTimeout(() => { el.style.display = 'none'; }, 10000);
+}
+
+// GASが書き込む列の順番（gas_server.jsのHEADERS定義と一致）
+// A=0:記録日 B=1:記録者 C=2:捕獲器ID D=3:合計 E=4:オス F=5:メス
+// G=6:緯度  H=7:経度  I=8:住所  J=9:樹種  K=10:メモ L=11:送信日時 M=12:週番号
+const COL = {
+  date:0, observer:1, trapId:2, total:3, male:4, female:5,
+  lat:6, lng:7, address:8, treeSpecies:9, memo:10, timestamp:11, weekNumber:12
+};
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim() !== '');
+  if (lines.length === 0) return [];
+
+  // 1行目がヘッダーかデータか自動判定
+  // G列(index 6)が数値ならデータ行、文字列ならヘッダー行としてスキップ
+  const firstVals = splitCSVLine(lines[0]);
+  const firstLat = (firstVals[COL.lat] || '').replace(/^"|"$/g,'').trim();
+  const hasHeader = isNaN(parseFloat(firstLat));
+  const dataLines = hasHeader ? lines.slice(1) : lines;
+
+  return dataLines.map(line => {
+    const vals = splitCSVLine(line);
+    const get = (i) => (vals[i] || '').replace(/^"|"$/g,'').trim();
+    return {
+      date:        get(COL.date),
+      observer:    get(COL.observer),
+      trapId:      get(COL.trapId),
+      total:       get(COL.total),
+      male:        get(COL.male),
+      female:      get(COL.female),
+      lat:         get(COL.lat),
+      lng:         get(COL.lng),
+      address:     get(COL.address),
+      treeSpecies: get(COL.treeSpecies),
+      memo:        get(COL.memo),
+      timestamp:   get(COL.timestamp),
+      weekNumber:  get(COL.weekNumber)
+    };
+  }).filter(r => {
+    // 緯度・経度が有効な数値かつ日本の範囲内の行だけ残す
+    const lat = parseFloat(r.lat);
+    const lng = parseFloat(r.lng);
+    return !isNaN(lat) && !isNaN(lng) && lat >= 20 && lat <= 50 && lng >= 120 && lng <= 155;
+  });
+}
+
+function splitCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQ = false;
+  for (let c of line) {
+    if (c === '"') { inQ = !inQ; continue; }
+    if (c === ',' && !inQ) { result.push(current); current = ''; continue; }
+    current += c;
+  }
+  result.push(current);
+  return result;
+}
+
+// ======================================================
+// フィルター機能
+// ======================================================
+// フィルターオプション（捕獲器、樹種）を更新
+function updateFilterOptions() {
+  const traps = [...new Set(rawData.map(r=>r.trapId||'').filter(Boolean))].sort();
+  const trees = [...new Set(rawData.flatMap(r=>(r.treeSpecies||'').split('・').filter(Boolean)))].sort();
+  const trapSel = document.getElementById('filterTrap');
+  trapSel.innerHTML = '<option value="">すべて</option>' +
+    traps.map(t=>`<option>${t}</option>`).join('');
+  const treeSel = document.getElementById('filterTree');
+  treeSel.innerHTML = '<option value="">すべて</option>' +
+    trees.map(t=>`<option>${t}</option>`).join('');
+}
+
+// フィルター条件を適用してデータを絞り込み、マップとチャートを更新
+function applyFilter() {
+  const start = document.getElementById('filterStart').value;
+  const end   = document.getElementById('filterEnd').value;
+  const trap  = document.getElementById('filterTrap').value;
+  const tree  = document.getElementById('filterTree').value;
+
+  filteredData = rawData.filter(r => {
+    if (start && r.date < start) return false;
+    if (end   && r.date > end)   return false;
+    if (trap  && r.trapId !== trap) return false;
+    if (tree  && !(r.treeSpecies||'').includes(tree)) return false;
+    return true;
+  });
+
+  renderMap();
+  renderCharts();
+  renderStats();
+}
+
+// ======================================================
+// マップ描画
+// ======================================================
+// 捕獲数に応じたマーカー色を決定
+function getMarkerColor(count) {
+  if (count >= 50) return '#7c3aed';
+  if (count >= 20) return '#ef4444';
+  if (count >= 5)  return '#f59e0b';
+  return '#3b82f6';
+}
+
+// 捕獲数に応じたマーカー半径を決定
+function getMarkerRadius(count) {
+  if (count >= 50) return 18;
+  if (count >= 20) return 14;
+  if (count >= 5)  return 11;
+  return 8;
+}
+
+// フィルター済みデータを基にマップ上のマーカーを描画
+function renderMap() {
+  markerCluster.clearLayers();
+
+  // 捕獲器ごとに最新データを集約
+  const trapMap = {};
+  filteredData.forEach(r => {
+    const key = `${r.lat}_${r.lng}_${r.trapId||''}`;
+    if (!trapMap[key]) {
+      trapMap[key] = { lat: parseFloat(r.lat), lng: parseFloat(r.lng),
+        trapId: r.trapId, records: [], treeSpecies: r.treeSpecies };
+    }
+    trapMap[key].records.push(r);
+  });
+
+  // 各捕獲器の位置にマーカーを配置
+  Object.values(trapMap).forEach(trap => {
+    const total = trap.records.reduce((s,r) => s + (parseInt(r.total)||0), 0);
+    const lastDate = trap.records.map(r=>r.date).sort().reverse()[0];
+    const color = getMarkerColor(total);
+    const radius = getMarkerRadius(total);
+
+    const circle = L.circleMarker([trap.lat, trap.lng], {
+      radius,
+      fillColor: color,
+      color: '#fff',
+      weight: 1.5,
+      opacity: 0.9,
+      fillOpacity: 0.85
+    });
+
+    // 雌雄別の集計情報をポップアップに表示
+    const sexLine = (() => {
+      const males   = trap.records.reduce((s,r)=>s+(parseInt(r.male)||0),0);
+      const females = trap.records.reduce((s,r)=>s+(parseInt(r.female)||0),0);
+      if (males || females) return `<div class="popup-row"><span>雌雄</span><span>♂${males} ♀${females}</span></div>`;
+      return '';
+    })();
+
+    // マーカークリック時のポップアップ内容を設定
+    circle.bindPopup(`
+      <div class="popup-header">🪲 ${trap.trapId || '捕獲器'}</div>
+      <div class="popup-count">${total}</div>
+      <div class="popup-count-label">頭（累計 ${trap.records.length}日分）</div>
+      ${sexLine}
+      <div class="popup-row"><span>樹種</span><span>${trap.treeSpecies||'不明'}</span></div>
+      <div class="popup-row"><span>最終記録</span><span>${lastDate||'--'}</span></div>
+      <div class="popup-row"><span>座標</span><span>${trap.lat.toFixed(5)}, ${trap.lng.toFixed(5)}</span></div>
+    `, { maxWidth: 220 });
+
+    markerCluster.addLayer(circle);
+  });
+}
+
+// ======================================================
+// 統計表示
+// ======================================================
+// フィルター済みデータの統計情報を計算して表示
+function renderStats() {
+  const total = filteredData.reduce((s,r) => s+(parseInt(r.total)||0), 0);
+  const days  = new Set(filteredData.map(r=>r.date)).size;
+  const traps = new Set(filteredData.map(r=>`${r.lat}_${r.lng}`)).size;
+  const byDay = {};
+  filteredData.forEach(r => { byDay[r.date] = (byDay[r.date]||0) + (parseInt(r.total)||0); });
+  const maxDay = Math.max(0, ...Object.values(byDay));
+
+  document.getElementById('statTotal').textContent = total.toLocaleString();
+  document.getElementById('statDays').textContent  = days;
+  document.getElementById('statTraps').textContent = traps;
+  document.getElementById('statMax').textContent   = maxDay;
+}
+
+// ======================================================
+// チャート描画
+// ======================================================
+// すべてのチャートを更新
+function renderCharts() {
+  renderDailyChart();
+  renderTrapChart();
+}
+
+// 日別捕獲数の棒グラフを描画
+function renderDailyChart() {
+  const byDay = {};
+  filteredData.forEach(r => { byDay[r.date] = (byDay[r.date]||0) + (parseInt(r.total)||0); });
+  const labels = Object.keys(byDay).sort();
+  const values = labels.map(d => byDay[d]);
+
+  if (charts.daily) charts.daily.destroy();
+  charts.daily = new Chart(document.getElementById('chartDaily'), {
+    type: 'bar',
+    data: {
+      labels: labels.map(d => d.slice(5)),
+      datasets: [{ data: values, backgroundColor: '#e05c2a99', borderColor: '#e05c2a', borderWidth: 1, borderRadius: 3 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#6b7f99', font: { size: 10 } }, grid: { color: '#2a3344' } },
+        y: { ticks: { color: '#6b7f99', font: { size: 10 } }, grid: { color: '#2a3344' } }
+      }
+    }
+  });
+}
+
+// 捕獲器別合計の横棒グラフを描画
+function renderTrapChart() {
+  const byTrap = {};
+  filteredData.forEach(r => {
+    const k = r.trapId || '不明';
+    byTrap[k] = (byTrap[k]||0) + (parseInt(r.total)||0);
+  });
+  const sorted = Object.entries(byTrap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  if (charts.trap) charts.trap.destroy();
+  charts.trap = new Chart(document.getElementById('chartTrap'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(([k])=>k),
+      datasets: [{ data: sorted.map(([,v])=>v), backgroundColor: '#f0a04b88', borderColor: '#f0a04b', borderWidth: 1, borderRadius: 3, indexAxis: 'y' }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#6b7f99', font: { size: 10 } }, grid: { color: '#2a3344' } },
+        y: { ticks: { color: '#6b7f99', font: { size: 10 } }, grid: { color: '#2a3344' } }
+      }
+    }
+  });
+}
+
+// ======================================================
+// スマホ対応
+// ======================================================
+// サイドパネルを表示/非表示を切り替え
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('show');
+}
+
+// ======================================================
+// 起動処理
+// ======================================================
+// ページ読み込み時にデータを読み込み、5分ごとに自動更新
+loadData();
+setInterval(loadData, 5 * 60 * 1000); // 5分ごとに自動更新
+</script>
+</body>
+</html>
