@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>クビアカツヤカミキリ 捕獲記録</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Share+Tech+Mono&display=swap');
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--accent:#e05c2a;--accent2:#f0a04b;--text:#e6edf3;--text-muted:#7d8590;--success:#3fb950;--error:#f85149;--radius:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 50px;}
+header{background:linear-gradient(135deg,#1a0a00,#2d1200,#1a0a00);border-bottom:2px solid var(--accent);padding:12px 16px;position:sticky;top:0;z-index:100;}
+.header-inner{display:flex;align-items:center;justify-content:space-between;max-width:640px;margin:0 auto;}
+.header-left{display:flex;align-items:center;gap:10px;}
+.beetle{font-size:28px;filter:drop-shadow(0 0 6px var(--accent));}
+.header-text h1{font-size:14px;font-weight:700;color:var(--accent2);line-height:1.2;}
+.header-text p{font-size:10px;color:var(--text-muted);}
+.id-badge{background:var(--surface2);border:1px solid var(--accent);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--accent2);font-family:'Share Tech Mono',monospace;cursor:pointer;white-space:nowrap;}
+.tab-nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:57px;z-index:90;}
+.tab-nav button{flex:1;padding:12px 4px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.tab-nav button.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.container{max-width:640px;margin:0 auto;padding:16px 14px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+.card-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.card-title::before{content:'';display:inline-block;width:3px;height:13px;background:var(--accent);border-radius:2px;}
+.form-group{margin-bottom:12px;}
+.form-group:last-child{margin-bottom:0;}
+label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:5px;font-weight:500;}
+label .req{color:var(--error);margin-left:2px;}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:15px;padding:9px 11px;transition:border-color .2s;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(224,92,42,.15);}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237d8590' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px;}
+textarea{resize:none;font-size:13px;}
+.count-row{display:flex;align-items:center;gap:6px;}
+.count-row input{flex:1;text-align:center;font-family:'Share Tech Mono',monospace;font-size:22px;}
+.cbt{width:42px;height:42px;flex-shrink:0;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:22px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
+.cbt:active{background:var(--border);}
+.cbt.plus{border-color:var(--accent);color:var(--accent);}
+.cbt-sm{width:30px;height:32px;flex-shrink:0;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:18px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
+.cbt-sm.plus{border-color:var(--accent);color:var(--accent);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.trap-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;}
+.trap-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.trap-num{font-size:13px;font-weight:700;color:var(--accent2);}
+.trap-del{background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:0 4px;-webkit-tap-highlight-color:transparent;}
+.add-trap-btn{width:100%;padding:11px;background:var(--surface2);border:1px dashed var(--border);border-radius:8px;color:var(--text-muted);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;margin-top:4px;transition:border-color .15s,color .15s;-webkit-tap-highlight-color:transparent;}
+.add-trap-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.loc-tabs{display:flex;gap:0;margin-bottom:10px;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.loc-tab{flex:1;padding:7px 4px;background:var(--surface2);border:none;color:var(--text-muted);font-family:'Noto Sans JP',sans-serif;font-size:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.loc-tab.active{background:var(--accent);color:#fff;font-weight:700;}
+.loc-panel{display:none;}
+.loc-panel.active{display:block;}
+.gps-btn{width:100%;padding:9px;background:var(--surface2);border:1px dashed var(--accent2);border-radius:6px;color:var(--accent2);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;-webkit-tap-highlight-color:transparent;}
+.geocode-btn{width:100%;padding:9px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;margin-top:6px;-webkit-tap-highlight-color:transparent;}
+.loc-status{font-size:11px;margin-top:6px;padding:7px 9px;border-radius:6px;display:none;}
+.loc-status.ok{display:block;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.3);color:var(--success);}
+.loc-status.err{display:block;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:var(--error);}
+.trap-selector{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px;}
+.trap-sel-btn{padding:10px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:11px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;}
+.trap-sel-btn.active{background:rgba(224,92,42,.15);border-color:var(--accent);color:var(--accent2);font-weight:700;}
+.trap-sel-num{font-size:20px;font-weight:700;font-family:'Share Tech Mono',monospace;display:block;}
+.trap-info-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--text-muted);line-height:1.8;display:none;}
+.trap-info-box.show{display:block;}
+.trap-info-box strong{color:var(--accent2);display:block;margin-bottom:3px;}
+.insect-group{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;}
+.insect-group-title{font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:10px;}
+.insect-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.insect-row:last-child{margin-bottom:0;}
+.insect-label{flex:1;font-size:13px;color:var(--text);}
+.ins-ct{display:flex;align-items:center;gap:3px;flex-shrink:0;}
+.ins-ct input{width:60px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:16px;padding:5px 4px;}
+.submit-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--accent),#c04820);border:none;border-radius:var(--radius);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.05em;transition:opacity .2s,transform .1s;-webkit-tap-highlight-color:transparent;}
+.submit-btn:active{transform:scale(.98);opacity:.9;}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+.save-btn{width:100%;padding:12px;background:var(--surface2);border:1px solid var(--accent);border-radius:var(--radius);color:var(--accent2);font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);border-radius:30px;padding:11px 20px;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.5);transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:1000;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:var(--success);color:var(--success);}
+.toast.error{border-color:var(--error);color:var(--error);}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-right:7px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;width:100%;max-width:420px;}
+.modal h2{font-size:16px;color:var(--accent2);margin-bottom:12px;}
+.modal p{font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;}
+.modal-btn-row{display:flex;gap:8px;margin-top:12px;}
+.modal-btn{flex:1;padding:11px;border-radius:6px;border:none;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.modal-btn.primary{background:var(--accent);color:#fff;}
+.modal-btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.date-row{display:flex;gap:8px;align-items:center;}
+.today-btn{flex-shrink:0;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--accent2);font-family:'Noto Sans JP',sans-serif;font-size:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.memo-count{font-size:10px;color:var(--text-muted);text-align:right;margin-top:3px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="beetle">🪲</div>
+      <div class="header-text">
+        <h1>クビアカツヤカミキリ 捕獲記録</h1>
+        <p>群馬県環境アドバイザー 自然環境部会</p>
+      </div>
+    </div>
+    <div class="id-badge" id="idBadge" onclick="showIdModal()">ID未設定</div>
+  </div>
+</header>
+
+<div class="tab-nav">
+  <button class="active" onclick="switchMainTab('setup')">⚙️ 捕獲器設定</button>
+  <button onclick="switchMainTab('record')">📋 日次記録</button>
+  <button onclick="switchMainTab('confirm')">📊 確認</button>
+</div>
+
+<!-- ===== 捕獲器設定タブ ===== -->
+<div id="tab-setup" class="container">
+  <div class="card">
+    <div class="card-title">参加者ID</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">
+      IDは自由に決められます（英数字・記号可、最大20文字）。<br>
+      このIDがスプレッドシートの記録に使われます。設定後はこの端末に記憶されます。
+    </p>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="participantId" placeholder="例: A01, TanakaK, GunmaAdv01" maxlength="20" style="flex:1">
+      <button class="save-btn" style="width:auto;padding:9px 16px;font-size:13px" onclick="saveId()">保存</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">捕獲器の登録（最大5台）</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">
+      設置する捕獲器ごとに<b style="color:var(--accent2)">実験条件</b>と<b style="color:var(--accent2)">位置情報</b>を登録してください。<br>
+      条件の例：誘引剤の種類、捕獲器の形状・色、設置高さ、設置場所の環境（日当たり・幹の向き）など。
+    </p>
+    <div id="trapList"></div>
+    <button class="add-trap-btn" id="addTrapBtn" onclick="addTrap()">＋ 捕獲器を追加する</button>
+  </div>
+
+  <button class="submit-btn" onclick="saveSetup()">💾 設定を保存する</button>
+</div>
+
+<!-- ===== 日次記録タブ ===== -->
+<div id="tab-record" class="container" style="display:none">
+
+  <div class="card">
+    <div class="card-title">記録日</div>
+    <div class="date-row">
+      <input type="date" id="recordDate" style="flex:1">
+      <button class="today-btn" onclick="setToday()">今日</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">捕獲器を選択</div>
+    <div class="trap-selector" id="trapSelector"></div>
+    <div class="trap-info-box" id="trapInfoBox"></div>
+  </div>
+
+  <div id="recordForm" style="display:none">
+
+    <!-- クビアカ -->
+    <div class="card">
+      <div class="card-title">🪲 クビアカツヤカミキリ 捕獲数</div>
+      <div class="insect-group">
+        <div class="insect-group-title">合計捕獲数 <span style="font-weight:400;color:var(--text-muted)">（必須）</span></div>
+        <div class="count-row">
+          <button class="cbt" onclick="chg('kubi_total',-1)">−</button>
+          <input type="number" id="kubi_total" value="0" min="0" inputmode="numeric">
+          <button class="cbt plus" onclick="chg('kubi_total',1)">＋</button>
+        </div>
+      </div>
+      <div class="insect-group" style="margin-top:10px">
+        <div class="insect-group-title">雌雄別 <span style="font-weight:400;color:var(--text-muted)">（判別できた場合のみ）</span></div>
+        <div class="grid2">
+          <div>
+            <label>♂ オス</label>
+            <div class="count-row">
+              <button class="cbt" onclick="chg('kubi_male',-1)">−</button>
+              <input type="number" id="kubi_male" value="" min="0" inputmode="numeric" placeholder="-">
+              <button class="cbt plus" onclick="chg('kubi_male',1)">＋</button>
+            </div>
+          </div>
+          <div>
+            <label>♀ メス</label>
+            <div class="count-row">
+              <button class="cbt" onclick="chg('kubi_female',-1)">−</button>
+              <input type="number" id="kubi_female" value="" min="0" inputmode="numeric" placeholder="-">
+              <button class="cbt plus" onclick="chg('kubi_female',1)">＋</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- その他昆虫 -->
+    <div class="card">
+      <div class="card-title">🐛 その他の捕獲昆虫 <span style="font-size:10px;color:var(--text-muted);text-transform:none;font-weight:400">（任意）</span></div>
+      <div class="insect-group">
+        <div class="insect-row">
+          <span class="insect-label">カミキリムシ類（クビアカ以外）</span>
+          <div class="ins-ct">
+            <button class="cbt-sm" onclick="chg('oth_cerambycid',-1)">−</button>
+            <input type="number" id="oth_cerambycid" value="0" min="0" inputmode="numeric">
+            <button class="cbt-sm plus" onclick="chg('oth_cerambycid',1)">＋</button>
+          </div>
+        </div>
+        <div class="insect-row">
+          <span class="insect-label">甲虫類（カミキリ以外）</span>
+          <div class="ins-ct">
+            <button class="cbt-sm" onclick="chg('oth_coleoptera',-1)">−</button>
+            <input type="number" id="oth_coleoptera" value="0" min="0" inputmode="numeric">
+            <button class="cbt-sm plus" onclick="chg('oth_coleoptera',1)">＋</button>
+          </div>
+        </div>
+        <div class="insect-row">
+          <span class="insect-label">ハチ目（ミツバチ等）</span>
+          <div class="ins-ct">
+            <button class="cbt-sm" onclick="chg('oth_hymenoptera',-1)">−</button>
+            <input type="number" id="oth_hymenoptera" value="0" min="0" inputmode="numeric">
+            <button class="cbt-sm plus" onclick="chg('oth_hymenoptera',1)">＋</button>
+          </div>
+        </div>
+        <div class="insect-row">
+          <span class="insect-label">その他の昆虫</span>
+          <div class="ins-ct">
+            <button class="cbt-sm" onclick="chg('oth_insects',-1)">−</button>
+            <input type="number" id="oth_insects" value="0" min="0" inputmode="numeric">
+            <button class="cbt-sm plus" onclick="chg('oth_insects',1)">＋</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:10px;margin-bottom:0">
+        <label>種名・詳細メモ</label>
+        <input type="text" id="oth_note" placeholder="例: ゴマダラカミキリ3頭、オオスズメバチ1頭">
+      </div>
+    </div>
+
+    <!-- メモ -->
+    <div class="card">
+      <div class="card-title">メモ・観察記録</div>
+      <textarea id="memo" rows="3" maxlength="200" placeholder="天候・気温、捕獲器の状態、周辺環境の変化など"></textarea>
+      <div class="memo-count"><span id="memoLen">0</span>/200</div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitRecord()">
+      📤 記録を送信する
+    </button>
+  </div>
+
+  <div id="noTrapMsg" style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px;display:none">
+    ⚙️ まず「捕獲器設定」タブで捕獲器を登録してください
+  </div>
+</div>
+
+<!-- ===== 確認タブ ===== -->
+<div id="tab-confirm" class="container" style="display:none">
+  <div class="card">
+    <div class="card-title">登録済み捕獲器</div>
+    <div id="confirmTrapList"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">送信ログ（この端末・直近50件）</div>
+    <div id="sendLog" style="font-size:12px;color:var(--text-muted);max-height:280px;overflow-y:auto;"></div>
+  </div>
+  <button class="save-btn" onclick="clearLog()">ログをクリア</button>
+</div>
+
+<!-- IDモーダル -->
+<div class="modal-bg" id="idModal" style="display:none">
+  <div class="modal">
+    <h2>🪪 参加者IDを設定</h2>
+    <p>自由に決めてください（英数字・記号、最大20文字）。<br>このIDがデータの識別子になります。</p>
+    <input type="text" id="modalIdInput" placeholder="例: A01, TanakaK" maxlength="20">
+    <div class="modal-btn-row">
+      <button class="modal-btn secondary" onclick="closeIdModal()">キャンセル</button>
+      <button class="modal-btn primary" onclick="saveIdFromModal()">設定する</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// 設定 ★ここを変更★
+// ============================================================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyvUEcrPDoQ4xsqxp4onhN7C-V5A_hVPubX2gF-UVAPYhP60GRAsPMJzhV5gpwV2KEZlg/exec';
+
+// ============================================================
+// 状態
+// ============================================================
+let participantId = '';
+let traps = [];         // 捕獲器設定の配列
+let selectedTrap = null;
+
+// ============================================================
+// 初期化
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  loadStorage();
+  setToday();
+  document.getElementById('memo').addEventListener('input', function(){
+    document.getElementById('memoLen').textContent = this.value.length;
+  });
+  document.getElementById('kubi_male').addEventListener('input', syncTotal);
+  document.getElementById('kubi_female').addEventListener('input', syncTotal);
+  renderSetup();
+  renderRecordTab();
+  renderConfirm();
+});
+
+// ============================================================
+// ストレージ
+// ============================================================
+function loadStorage() {
+  participantId = localStorage.getItem('pid') || '';
+  traps = JSON.parse(localStorage.getItem('traps') || '[]');
+  document.getElementById('participantId').value = participantId;
+  updateIdBadge();
+}
+
+function saveStorage() {
+  localStorage.setItem('pid', participantId);
+  localStorage.setItem('traps', JSON.stringify(traps));
+}
+
+// ============================================================
+// 参加者ID
+// ============================================================
+function updateIdBadge() {
+  document.getElementById('idBadge').textContent = participantId ? 'ID: ' + participantId : 'ID未設定';
+}
+
+function saveId() {
+  const v = document.getElementById('participantId').value.trim();
+  if (!v) { showToast('IDを入力してください', 'error'); return; }
+  participantId = v;
+  saveStorage();
+  updateIdBadge();
+  showToast('✅ IDを保存しました', 'success');
+}
+
+function showIdModal() {
+  document.getElementById('modalIdInput').value = participantId;
+  document.getElementById('idModal').style.display = 'flex';
+}
+function closeIdModal() { document.getElementById('idModal').style.display = 'none'; }
+function saveIdFromModal() {
+  const v = document.getElementById('modalIdInput').value.trim();
+  if (!v) { showToast('IDを入力してください', 'error'); return; }
+  participantId = v;
+  document.getElementById('participantId').value = v;
+  saveStorage();
+  updateIdBadge();
+  closeIdModal();
+  showToast('✅ IDを保存しました', 'success');
+}
+
+// ============================================================
+// タブ切替
+// ============================================================
+function switchMainTab(tab) {
+  ['setup','record','confirm'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-nav button').forEach((b,i) => {
+    b.classList.toggle('active', ['setup','record','confirm'][i] === tab);
+  });
+  if (tab === 'record') renderRecordTab();
+  if (tab === 'confirm') renderConfirm();
+}
+
+// ============================================================
+// 捕獲器設定
+// ============================================================
+function renderSetup() {
+  const list = document.getElementById('trapList');
+  list.innerHTML = '';
+  traps.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'trap-card';
+    div.innerHTML = `
+      <div class="trap-card-header">
+        <span class="trap-num">🪤 捕獲器 ${i+1} 号機</span>
+        <button class="trap-del" onclick="deleteTrap(${i})" title="削除">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>実験条件・設置条件の説明 <span class="req">*</span></label>
+        <textarea rows="2" maxlength="150"
+          placeholder="例: 市販誘引剤A使用・地上1.5m・桜幹の南面&#10;例: 誘引剤なし・地上2m・北面（対照区）"
+          onchange="traps[${i}].condition=this.value">${t.condition||''}</textarea>
+      </div>
+
+      <div class="grid2">
+        <div class="form-group">
+          <label>樹種</label>
+          <input type="text" placeholder="例: ソメイヨシノ"
+            value="${t.treeSpecies||''}" onchange="traps[${i}].treeSpecies=this.value">
+        </div>
+        <div class="form-group">
+          <label>設置高さ (m)</label>
+          <input type="number" step="0.1" min="0" placeholder="1.5"
+            value="${t.height||''}" onchange="traps[${i}].height=this.value" inputmode="decimal">
+        </div>
+      </div>
+
+      <div>
+        <label style="margin-bottom:8px">位置情報 <span class="req">*</span></label>
+        <div class="loc-tabs">
+          <button class="loc-tab ${!t.locTab||t.locTab==='gps'?'active':''}"
+            onclick="setLocTab(${i},'gps',this)">📍 GPS自動</button>
+          <button class="loc-tab ${t.locTab==='coord'?'active':''}"
+            onclick="setLocTab(${i},'coord',this)">🔢 手入力</button>
+          <button class="loc-tab ${t.locTab==='address'?'active':''}"
+            onclick="setLocTab(${i},'address',this)">🏠 住所変換</button>
+        </div>
+
+        <div class="loc-panel ${!t.locTab||t.locTab==='gps'?'active':''}" id="lp-gps-${i}">
+          <button class="gps-btn" onclick="getGPS(${i})">📡 現在地を取得する</button>
+          <div class="grid2">
+            <div><label>緯度</label><input id="lat-${i}" type="text" value="${t.locTab!=='coord'?t.lat||'':''}" readonly placeholder="取得待ち..." style="font-size:12px"></div>
+            <div><label>経度</label><input id="lng-${i}" type="text" value="${t.locTab!=='coord'?t.lng||'':''}" readonly placeholder="取得待ち..." style="font-size:12px"></div>
+          </div>
+        </div>
+
+        <div class="loc-panel ${t.locTab==='coord'?'active':''}" id="lp-coord-${i}">
+          <div class="grid2">
+            <div><label>緯度</label><input id="latM-${i}" type="text" value="${t.locTab==='coord'?t.lat||'':''}"
+              placeholder="36.3894" inputmode="decimal" onchange="traps[${i}].lat=this.value" style="font-size:12px"></div>
+            <div><label>経度</label><input id="lngM-${i}" type="text" value="${t.locTab==='coord'?t.lng||'':''}"
+              placeholder="139.0601" inputmode="decimal" onchange="traps[${i}].lng=this.value" style="font-size:12px"></div>
+          </div>
+        </div>
+
+        <div class="loc-panel ${t.locTab==='address'?'active':''}" id="lp-addr-${i}">
+          <input id="addr-${i}" type="text" value="${t.address||''}"
+            placeholder="例: 群馬県前橋市大手町1-1-1"
+            onchange="traps[${i}].address=this.value" style="font-size:12px">
+          <button class="geocode-btn" onclick="geocode(${i})">🔍 住所から座標を取得</button>
+        </div>
+
+        <div class="loc-status" id="ls-${i}"></div>
+        <div style="font-size:11px;margin-top:6px;color:${t.lat&&t.lng?'var(--success)':'var(--text-muted)'}">
+          ${t.lat&&t.lng
+            ? '✅ 座標設定済: '+parseFloat(t.lat).toFixed(5)+', '+parseFloat(t.lng).toFixed(5)
+            : '⚠ 座標が未設定です'}
+        </div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+  document.getElementById('addTrapBtn').style.display = traps.length >= 5 ? 'none' : 'block';
+}
+
+function addTrap() {
+  if (traps.length >= 5) return;
+  traps.push({ condition:'', treeSpecies:'', height:'', locTab:'gps', lat:'', lng:'', address:'' });
+  renderSetup();
+}
+
+function deleteTrap(i) {
+  if (!confirm(`捕獲器${i+1}号機の設定を削除しますか？`)) return;
+  traps.splice(i, 1);
+  if (selectedTrap === i) selectedTrap = null;
+  else if (selectedTrap > i) selectedTrap--;
+  renderSetup();
+}
+
+function setLocTab(i, tab, btn) {
+  traps[i].locTab = tab;
+  const card = btn.closest('.trap-card');
+  card.querySelectorAll('.loc-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const panelId = tab==='gps' ? `lp-gps-${i}` : tab==='coord' ? `lp-coord-${i}` : `lp-addr-${i}`;
+  card.querySelectorAll('.loc-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId)?.classList.add('active');
+}
+
+function getGPS(i) {
+  setLS(i, '📡 GPS取得中...', '');
+  if (!navigator.geolocation) { setLS(i, 'このブラウザは位置情報未対応', 'err'); return; }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      traps[i].lat = pos.coords.latitude.toFixed(6);
+      traps[i].lng = pos.coords.longitude.toFixed(6);
+      const latEl = document.getElementById(`lat-${i}`);
+      const lngEl = document.getElementById(`lng-${i}`);
+      if (latEl) latEl.value = traps[i].lat;
+      if (lngEl) lngEl.value = traps[i].lng;
+      setLS(i, `✅ 取得完了 ±${Math.round(pos.coords.accuracy)}m`, 'ok');
+      updateCoordDisplay(i);
+    },
+    err => setLS(i, `❌ ${err.message}`, 'err'),
+    { enableHighAccuracy:true, timeout:15000 }
+  );
+}
+
+async function geocode(i) {
+  const addr = document.getElementById(`addr-${i}`)?.value?.trim();
+  if (!addr) { setLS(i, '住所を入力してください', 'err'); return; }
+  setLS(i, '🔍 住所変換中...', '');
+  try {
+    const url = `https://geocoder.csis.u-tokyo.ac.jp/geocode/?q=${encodeURIComponent(addr)}&abr=true&geotype=json`;
+    const r = await fetch(url);
+    const j = await r.json();
+    if (j?.candidate?.length > 0) {
+      traps[i].lat = parseFloat(j.candidate[0].lat).toFixed(6);
+      traps[i].lng = parseFloat(j.candidate[0].lng).toFixed(6);
+      traps[i].address = addr;
+      setLS(i, '✅ 変換完了', 'ok');
+      updateCoordDisplay(i);
+    } else {
+      setLS(i, '❌ 住所が見つかりませんでした', 'err');
+    }
+  } catch(e) {
+    setLS(i, `❌ 通信エラー: ${e.message}`, 'err');
+  }
+}
+
+function setLS(i, msg, type) {
+  const el = document.getElementById(`ls-${i}`);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'loc-status' + (type ? ' '+type : '');
+  if (!type) el.style.display = 'block';
+}
+
+function updateCoordDisplay(i) {
+  const card = document.querySelectorAll('.trap-card')[i];
+  if (!card || !traps[i].lat) return;
+  const last = card.querySelector('div[style*="font-size:11px"]');
+  if (last) {
+    last.style.color = 'var(--success)';
+    last.textContent = `✅ 座標設定済: ${parseFloat(traps[i].lat).toFixed(5)}, ${parseFloat(traps[i].lng).toFixed(5)}`;
+  }
+}
+
+function saveSetup() {
+  if (!participantId) { showToast('参加者IDを設定してください', 'error'); return; }
+  if (traps.length === 0) { showToast('捕獲器を1台以上追加してください', 'error'); return; }
+  const noCondition = traps.findIndex(t => !t.condition.trim());
+  if (noCondition >= 0) { showToast(`捕獲器${noCondition+1}の条件説明を入力してください`, 'error'); return; }
+  const noLoc = traps.findIndex(t => !t.lat || !t.lng);
+  if (noLoc >= 0) { showToast(`捕獲器${noLoc+1}の位置情報を設定してください`, 'error'); return; }
+  saveStorage();
+  showToast('✅ 設定を保存しました', 'success');
+}
+
+// ============================================================
+// 日次記録タブ
+// ============================================================
+function renderRecordTab() {
+  const sel = document.getElementById('trapSelector');
+  const noMsg = document.getElementById('noTrapMsg');
+  const form = document.getElementById('recordForm');
+  sel.innerHTML = '';
+
+  if (traps.length === 0) {
+    noMsg.style.display = 'block';
+    form.style.display = 'none';
+    document.getElementById('trapInfoBox').classList.remove('show');
+    return;
+  }
+  noMsg.style.display = 'none';
+
+  traps.forEach((t, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'trap-sel-btn' + (selectedTrap === i ? ' active' : '');
+    btn.innerHTML = `<span class="trap-sel-num">${i+1}</span>号機`;
+    btn.onclick = () => selectTrap(i);
+    sel.appendChild(btn);
+  });
+
+  if (selectedTrap !== null && traps[selectedTrap]) {
+    showTrapInfo(selectedTrap);
+    form.style.display = 'block';
+  } else {
+    document.getElementById('trapInfoBox').classList.remove('show');
+    form.style.display = 'none';
+  }
+}
+
+function selectTrap(i) {
+  selectedTrap = i;
+  document.querySelectorAll('.trap-sel-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+  showTrapInfo(i);
+  document.getElementById('recordForm').style.display = 'block';
+  resetCounts();
+}
+
+function showTrapInfo(i) {
+  const t = traps[i];
+  const box = document.getElementById('trapInfoBox');
+  const coordStr = t.lat && t.lng
+    ? `${parseFloat(t.lat).toFixed(5)}, ${parseFloat(t.lng).toFixed(5)}`
+    : '未設定';
+  box.innerHTML = `
+    <strong>🪤 捕獲器 ${i+1} 号機の設定条件</strong>
+    <span style="color:var(--text)">${t.condition || '（条件未入力）'}</span>
+    ${t.treeSpecies ? `<span>樹種: <b style="color:var(--text)">${t.treeSpecies}</b></span>` : ''}
+    ${t.height     ? `<span>設置高さ: <b style="color:var(--text)">${t.height} m</b></span>` : ''}
+    <span>座標: <b style="color:var(--text)">${coordStr}</b></span>
+  `;
+  box.classList.add('show');
+}
+
+function resetCounts() {
+  const ids = ['kubi_total','kubi_male','kubi_female','oth_cerambycid','oth_coleoptera','oth_hymenoptera','oth_insects'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = ['kubi_male','kubi_female'].includes(id) ? '' : '0';
+  });
+  ['oth_note','memo'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('memoLen').textContent = '0';
+}
+
+function syncTotal() {
+  const m = parseInt(document.getElementById('kubi_male').value)||0;
+  const f = parseInt(document.getElementById('kubi_female').value)||0;
+  if (m || f) document.getElementById('kubi_total').value = m + f;
+}
+
+// ============================================================
+// 送信
+// ============================================================
+async function submitRecord() {
+  if (!participantId) { showToast('参加者IDを設定してください', 'error'); return; }
+  if (selectedTrap === null) { showToast('捕獲器を選択してください', 'error'); return; }
+  const date = document.getElementById('recordDate').value;
+  if (!date) { showToast('記録日を選択してください', 'error'); return; }
+
+  const trap = traps[selectedTrap];
+  const btn = document.getElementById('submitBtn');
+
+  const payload = {
+    // 参加者・捕獲器情報
+    participantId,
+    trapNum:     selectedTrap + 1,
+    condition:   trap.condition,
+    treeSpecies: trap.treeSpecies || '',
+    height:      trap.height || '',
+    lat:         parseFloat(trap.lat),
+    lng:         parseFloat(trap.lng),
+    address:     trap.address || '',
+    // 記録日
+    date,
+    // クビアカ捕獲数
+    kubiTotal:   parseInt(document.getElementById('kubi_total').value) || 0,
+    kubiMale:    document.getElementById('kubi_male').value !== ''
+                   ? parseInt(document.getElementById('kubi_male').value) || 0 : '',
+    kubiFemale:  document.getElementById('kubi_female').value !== ''
+                   ? parseInt(document.getElementById('kubi_female').value) || 0 : '',
+    // その他昆虫
+    othCerambycid:  parseInt(document.getElementById('oth_cerambycid').value)  || 0,
+    othColeoptera:  parseInt(document.getElementById('oth_coleoptera').value)  || 0,
+    othHymenoptera: parseInt(document.getElementById('oth_hymenoptera').value) || 0,
+    othInsects:     parseInt(document.getElementById('oth_insects').value)     || 0,
+    othNote:        document.getElementById('oth_note').value.trim(),
+    memo:           document.getElementById('memo').value.trim(),
+    timestamp:      new Date().toISOString()
+  };
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>送信中...';
+
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    addLog(date, selectedTrap + 1, payload.kubiTotal);
+    showToast(`✅ 捕獲器${selectedTrap+1}号機の記録を送信しました`, 'success');
+    resetCounts();
+  } catch(e) {
+    showToast('❌ 送信エラー: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📤 記録を送信する';
+  }
+}
+
+// ============================================================
+// 確認タブ
+// ============================================================
+function renderConfirm() {
+  const tl = document.getElementById('confirmTrapList');
+  tl.innerHTML = traps.length === 0
+    ? '<p style="color:var(--text-muted);font-size:13px">捕獲器が登録されていません</p>'
+    : traps.map((t,i) => `
+        <div style="border-left:3px solid var(--accent);padding-left:10px;margin-bottom:14px">
+          <div style="font-weight:700;color:var(--accent2);margin-bottom:4px">🪤 捕獲器${i+1}号機</div>
+          <div style="color:var(--text);font-size:13px;margin-bottom:4px">${t.condition||'条件未入力'}</div>
+          <div style="color:var(--text-muted);font-size:12px">
+            ${t.treeSpecies?`樹種: ${t.treeSpecies}　`:''}
+            ${t.height?`高さ: ${t.height}m　`:''}
+            ${t.lat&&t.lng
+              ?`座標: ${parseFloat(t.lat).toFixed(4)}, ${parseFloat(t.lng).toFixed(4)}`
+              :'<span style="color:var(--error)">⚠ 座標未設定</span>'}
+          </div>
+        </div>
+      `).join('');
+
+  const logs = JSON.parse(localStorage.getItem('send_log') || '[]');
+  const sl = document.getElementById('sendLog');
+  sl.innerHTML = logs.length === 0
+    ? '<p>送信履歴はありません</p>'
+    : logs.map(l => `
+        <div style="padding:6px 0;border-bottom:1px solid var(--border)">
+          ${l.date}　捕獲器<b style="color:var(--accent2)">${l.trapNum}</b>号機　
+          クビアカ<b style="color:var(--accent2)">${l.count}</b>頭
+          <span style="float:right;color:var(--text-muted)">${l.at}</span>
+        </div>
+      `).join('');
+}
+
+function addLog(date, trapNum, count) {
+  const logs = JSON.parse(localStorage.getItem('send_log') || '[]');
+  logs.unshift({ date, trapNum, count, at: new Date().toLocaleTimeString('ja-JP') });
+  if (logs.length > 50) logs.pop();
+  localStorage.setItem('send_log', JSON.stringify(logs));
+}
+
+function clearLog() {
+  localStorage.removeItem('send_log');
+  renderConfirm();
+  showToast('ログをクリアしました', '');
+}
+
+// ============================================================
+// ユーティリティ
+// ============================================================
+function setToday() {
+  const d = new Date();
+  document.getElementById('recordDate').value =
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function chg(id, delta) {
+  const el = document.getElementById(id);
+  el.value = Math.max(0, (parseInt(el.value)||0) + delta);
+}
+
+let toastTm = null;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTm);
+  toastTm = setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
